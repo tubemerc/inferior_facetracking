@@ -1,0 +1,2 @@
+# inferior_facetracking
+FaceRigのﾊﾟﾁﾓﾝをつくる
