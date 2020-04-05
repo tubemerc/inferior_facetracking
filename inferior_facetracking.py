@@ -2,7 +2,16 @@
 import cv2
 import dlib
 import numpy as np
-
+"""
+顔認識：眉, 目, 鼻, 口, 顎.
+配置パーツ：眉, 目, 鼻, 口.
+To do：
+    - 輪郭.
+    - 髪(含:耳).
+    - 回転(平面).
+    - 回転(振り向き).
+    - 瞬き.
+"""
 set_parameter = {
                  "input_video"       : 0,
                  "img_background"    : "./img/background.png",
@@ -160,8 +169,8 @@ class inferior_facetracking:
                                    (points[0], points[1]),
                                    (0, 255, 0))
         
-        i = 133
-        cv2.drawMarker(self.frame_org, (self.landmarks[0][i][0], self.landmarks[0][i][1]), (255, 0, 0))
+        #i = 133
+        #cv2.drawMarker(self.frame_org, (self.landmarks[0][i][0], self.landmarks[0][i][1]), (255, 0, 0))
     
     # 目配置
     def put_eyes(self):
