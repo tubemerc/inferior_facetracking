@@ -8,8 +8,9 @@ set_parameter = {
                  "img_background"    : "./img/background.png",
                  "img_baseface"      : "./img/baseface.png",
                  "img_eyebrows"      : "./img/eyebrows.png",
-                 "img_eyes"           : "./img/eyes.png",
+                 "img_eyes"          : "./img/eyes.png",
                  "img_mouth"         : "./img/mouth.png",
+                 "img_nose"          : "./img/nose.png",
                  "path_predictor"    : "./tools/helen-dataset.dat",
                  "path_cascade_face" : "./tools/haarcascade_frontalface_alt.xml"
                  #"height"            : 
@@ -23,6 +24,7 @@ class inferior_facetracking:
                        img_eyebrows,
                        img_eyes,
                        img_mouth,
+                       img_nose,
                        path_predictor,
                        path_cascade_face,
                        height=None, width=None):
@@ -32,6 +34,7 @@ class inferior_facetracking:
         self.eyebrows    = cv2.imread(img_eyebrows)
         self.eyes        = cv2.imread(img_eyes)
         self.mouth       = cv2.imread(img_mouth)
+        self.nose        = cv2.imread(img_nose)
         self.height      = height
         self.width       = width
         # predictor, detector, cascade classifier設定
@@ -87,6 +90,8 @@ class inferior_facetracking:
                 if self.landmarks:
                     self.put_eyes()
                     self.put_mouth()
+                    self.put_eyebrows()
+                    self.put_nose()
                 # 顔領域表示
                 for x, y, w, h in self.face_area:
                     cv2.rectangle(self.frame_org,
@@ -126,7 +131,6 @@ class inferior_facetracking:
             
             cv2.imshow("Landmarks", self.frame_org)
             cv2.imshow("IFTRK", self.background)
-            cv2.imshow("back", self._background)
             
             self.background = self._background.copy()
             self.end_flag, self.frame_org = self.org.read()
@@ -156,8 +160,8 @@ class inferior_facetracking:
                                    (points[0], points[1]),
                                    (0, 255, 0))
         
-        #i = 187
-        #cv2.drawMarker(self.frame_org, (self.landmarks[0][i][0], self.landmarks[0][i][1]), (255, 0, 0))
+        i = 133
+        cv2.drawMarker(self.frame_org, (self.landmarks[0][i][0], self.landmarks[0][i][1]), (255, 0, 0))
     
     # 目配置
     def put_eyes(self):
@@ -169,7 +173,7 @@ class inferior_facetracking:
                             self.landmarks[0][18][0]:self.landmarks[0][18][0] + _eye_l_w]\
                 = re_eye_l
         else:
-            print("[ERROR] negative left eye.")
+            print("[ERROR] negative position of left eye.")
         
         _eye_r_w = self.landmarks[0][40][0] - self.landmarks[0][51][0]
         _eye_r_h = self.landmarks[0][56][1] - self.landmarks[0][45][1]
@@ -179,9 +183,9 @@ class inferior_facetracking:
                             self.landmarks[0][51][0]:self.landmarks[0][51][0] + _eye_r_w]\
                 = re_eye_r
         else:
-            print("[ERROR] negative right eye.")
+            print("[ERROR] negative position of right eye.")
     
-    #口配置
+    # 口配置
     def put_mouth(self):
         _mouth_w = self.landmarks[0][164][0] - self.landmarks[0][148][0]
         _mouth_h = self.landmarks[0][10][1] - self.landmarks[0][187][1]
@@ -191,8 +195,41 @@ class inferior_facetracking:
                             self.landmarks[0][148][0]:self.landmarks[0][148][0] + _mouth_w]\
                 = re_mouth
         else:
-            print("[ERROR] negative mouth.")
+            print("[ERROR] negative position of mouth.")
         
+    # 眉配置
+    def put_eyebrows(self):
+        _brow_l_w = self.landmarks[0][73][0] - self.landmarks[0][62][0]
+        _brow_l_h = self.landmarks[0][78][1] - self.landmarks[0][67][1]
+        if _brow_l_w > 0 and _brow_l_h > 0:
+            re_brow_l = cv2.resize(self.eyebrows, dsize=(_brow_l_w, _brow_l_h))
+            self.background[self.landmarks[0][67][1]:self.landmarks[0][67][1] + _brow_l_h,
+                            self.landmarks[0][62][0]:self.landmarks[0][62][0] + _brow_l_w]\
+                = re_brow_l
+        else:
+            print("[ERROR] negative position of left eyebrow.")
+        
+        _brow_r_w = self.landmarks[0][84][0] - self.landmarks[0][95][0]
+        _brow_r_h = self.landmarks[0][100][1] - self.landmarks[0][89][1]
+        if _brow_r_w > 0 and _brow_r_h > 0:
+            re_brow_r = cv2.resize(self.eyebrows, dsize=(_brow_r_w, _brow_r_h))
+            self.background[self.landmarks[0][89][1]:self.landmarks[0][89][1] + _brow_r_h,
+                            self.landmarks[0][95][0]:self.landmarks[0][95][0] + _brow_r_w]\
+                = re_brow_r
+        else:
+            print("[ERROR] negative position of right eyebrow.")
+            
+    # 鼻配置
+    def put_nose(self):
+        _nose_w = self.landmarks[0][144][0] - self.landmarks[0][133][0]
+        _nose_h = self.landmarks[0][138][1] - self.landmarks[0][130][1]
+        if _nose_w > 0 and _nose_h > 0:
+            re_nose = cv2.resize(self.nose, dsize=(_nose_w, _nose_h))
+            self.background[self.landmarks[0][133][1]:self.landmarks[0][133][1] + _nose_h,
+                            self.landmarks[0][148][0]:self.landmarks[0][148][0] + _nose_w]\
+                = re_nose
+        else:
+            print("[ERROR] negative position of nose.")
 
 if __name__ == "__main__":
     live2d = inferior_facetracking(**set_parameter)
